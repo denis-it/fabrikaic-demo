@@ -26,26 +26,6 @@ const uint16_t g_bounds[] = {
 uint16_t g_value[] = {0.59 * MS_PULSE_MULTIPLIER, 0.85 * MS_PULSE_MULTIPLIER, 0.37 * MS_PULSE_MULTIPLIER};
 uint16_t g_target[] = {0.59 * MS_PULSE_MULTIPLIER, 0.85 * MS_PULSE_MULTIPLIER, 0.37 * MS_PULSE_MULTIPLIER};
 
-
-// each byte encodes servo, target for it and wait mode
-// bits 7-6 encodes servo number
-// bit 5 encodes wait mode (1 - do not wait, 0 - wait until previous targets reached)
-// bits 4-0 encodes position
-const uint8_t eeprom[] __attribute__((section (".eeprom"))) = {
-	0x10, 0x7F, 0xA0,
-	0x00, 0x1F, 0x10,
-	0x40, 0x5F,
-	0x98, 0x80,
-
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-
-	0x98, 0x65,
-	0x00,
-	0x5F, 0x85, 0x45,
-	0x1F,
-	0x5F, 0x98, 0x45,
-};
-
 uint8_t bound(const uint16_t min, const uint16_t value, const uint16_t max) {
 	return value < min ? min : max < value ? max : value;
 }
@@ -128,6 +108,10 @@ int main (void) {
     while (1) {
 		static uint8_t* pointer = 0;
 
+		// each byte encodes servo, target for it and wait mode
+		// bits 7-6 encodes servo number
+		// bit 5 encodes wait mode (1 - do not wait, 0 - wait until previous targets reached)
+		// bits 4-0 encodes position
 		const uint8_t value = eeprom_read_byte(pointer);
 
 		const uint8_t channel = value >> 6;
