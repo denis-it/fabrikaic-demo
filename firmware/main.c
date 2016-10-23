@@ -57,7 +57,7 @@ ISR (TIMER0_COMPA_vect) {
 		PORTB = 0xFF;
 
 		move_to_target();
-	} else  {
+	} else {
 		uint8_t channel = CHANNELS_COUNT;
 		while (channel-- != 0) {
 			if (s_counter == g_value[channel]) {
@@ -102,42 +102,66 @@ void load_next_target(const uint8_t channel, const uint8_t target) {
 	}
 }
 
+// each command encodes servo, target for it and wait mode
+// bits 7-6 encodes servo number
+// bit 5 encodes wait mode (1 - do not wait, 0 - wait until previous targets reached)
+// bits 4-0 encodes position
+uint8_t process_next_command(const uint8_t command, const uint8_t force_skip_wait) {
+	const uint8_t channel = command >> 6;
+	const uint8_t target = command & (PULSE_RANGE - 1);
+	const uint8_t skip_wait = force_skip_wait || BIT_SET(command, 5) != 0;
+
+	if (!skip_wait) {
+		uint8_t done = 1;
+
+		{
+			uint8_t channel = CHANNELS_COUNT;
+			while (channel-- != 0) {
+				if (compare_target(channel) != 0) {
+					done = 0;
+				}
+			}
+		}
+
+		if (done == 1) {
+			_delay_ms(10);
+			load_next_target(channel, target);
+			return 1;
+		}
+	} else {
+		load_next_target(channel, target);
+		return 1;
+	}
+
+	return 0;
+}
+
+void finish(void) {
+	const uint8_t program[] = {0x10, 0x7F, 0xA0};
+
+	uint8_t pointer = 0;
+	while (1) {
+		if (pointer < 3) {
+			const uint8_t command = program[pointer];
+			pointer += process_next_command(command, 0);
+		} else {
+			// comment this out to stop when program finished
+			break;
+		}
+	}
+}
+
 int main (void) {
 	configure();
 
-    while (1) {
-		static uint8_t* pointer = 0;
+	uint8_t* pointer = 0;
+	while (1) {
+		const uint8_t command = eeprom_read_byte(pointer);
+		pointer += process_next_command(command, pointer == 0);
 
-		// each byte encodes servo, target for it and wait mode
-		// bits 7-6 encodes servo number
-		// bit 5 encodes wait mode (1 - do not wait, 0 - wait until previous targets reached)
-		// bits 4-0 encodes position
-		const uint8_t value = eeprom_read_byte(pointer);
-
-		const uint8_t channel = value >> 6;
-		const uint8_t target = value & (PULSE_RANGE - 1);
-		const uint8_t skip_wait = BIT_SET(value, 5);
-
-		if (skip_wait == 0) {
-			uint8_t done = 1;
-
-			{
-				uint8_t channel = CHANNELS_COUNT;
-				while (channel-- != 0) {
-					if (compare_target(channel) != 0) {
-						done = 0;
-					}
-				}
-			}
-			
-			if (done == 1) {
-				_delay_ms(10);
-				load_next_target(channel, target);
-				pointer++;
-			}
-		} else {
-			load_next_target(channel, target);
-			pointer++;
+		if (pointer == (uint8_t*) 0x80) {
+			pointer = 0;
+			finish();
 		}
-    }
+	}
 }
