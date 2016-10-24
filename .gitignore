@@ -53,12 +53,17 @@ dkms.conf
 # Vim files
 .*.swp
 .*.swo
+.*.swn
 
 # Local files
 .local/
+webctrl/commands.bin
 
 # AVR GCC generated files
 *.eep
 *.lss
 *.lst
 *.sym
+
+# Docker files
+webctrl/core

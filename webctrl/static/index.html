@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>FabrikaIC Demo</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="css/bootstrap-slider.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body ng-app="fabrikaic-demo">
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="jumbotron">
+            <h1>FabrikaIC Demo</h1>
+            <p>WELCOME BACK, COMMANDER.</p>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12">
+
+          <ul class="nav nav-pills" role="tablist">
+            <li role="presentation" class="active"><a href="#queue" aria-controls="queue" role="tab" data-toggle="pill">Queue</a></li>
+            <li role="presentation"><a href="#program" aria-controls="program" role="tab" data-toggle="pill">Program</a></li>
+          </ul>
+
+          <div class="tab-content">
+
+            <div role="tabpanel" class="tab-pane fade in active" id="queue">
+              <h2>Execution queue</h2>
+              <div ng-controller="QueueController as ctrl">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Program</th>
+                      <th>Commands</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="program in queue" class="{{program.status == 0 ? 'success' : program.status == 1 ? 'warning' : ''}}">
+                      <td>{{$index + 1}}</td>
+                      <td ng-show="{{program.name !== undefined}}">{{program.name}}</td>
+                      <td ng-show="{{program.name === undefined}}"><i>undefined</i></td>
+                      <td>{{program.commands}}</td>
+                      <td>{{program.status == 0 ? 'Finished' : program.status == 1 ? 'In progress' : 'Pending'}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div role="tabpanel" class="tab-pane fade" id="program" ng-controller="ProgramController as ctrl">
+              <h2>Your program</h2>
+              <form>
+                <div class="form-group">
+                  <label for="name" class="control-label">Program name</label>
+                  <input type="text" class="form-control" ng-model="program.name" placeholder="Program name">
+                </div>
+
+                <div class="form-group">
+                  <label class="control-label">Position</label>
+                  <div class="lead text-center">
+                    <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+                    <input class="form-control slider" type="text" ng-model="position[0]" data-slider-min="0" data-slider-max="31" data-slider-step="1" data-slider-value="16"/>
+                    <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+                  </div>
+                  <div class="lead text-center">
+                    <span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>
+                    <input class="form-control slider" type="text" ng-model="position[1]" data-slider-min="0" data-slider-max="31" data-slider-step="1" data-slider-value="0"/>
+                    <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
+                  </div>
+                  <div class="lead text-center">
+                    <span class="glyphicon glyphicon-resize-small" aria-hidden="true"></span>
+                    <input class="form-control slider" type="text" ng-model="position[2]" data-slider-min="0" data-slider-max="31" data-slider-step="1" data-slider-value="0"/>
+                    <span class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
+                  </div>
+                </div>
+                <div class="form-group text-center">
+                  <button ng-click="addPositionToProgram()" ng-disabled="program.positions.length >= 10" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span>
+                    Add to program
+                    <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span>
+                  </button>
+                  <p><small>{{10 - program.positions.length}} position(s) remain</small></p>
+                </div>
+              </form>
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Position</th>
+                    <th>Remove</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="position in program.positions track by $index">
+                    <td>{{$index + 1}}</td>
+                    <td>{{position[0] | hex}}, {{position[1] | hex}}, {{position[2] | hex}}</td>
+                    <td><button ng-click="program.positions.splice($index, 1)" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="text-center">
+              <button class="btn btn-success" ng-disabled="program.positions.length == 0">
+                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                SEND
+              </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-slider.min.js"></script>
+    <script src="js/angular.min.js"></script>
+    <script src="js/angular-resource.min.js"></script>
+
+    <script src="js/app.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/controllers.js"></script>
+
+    <script>
+      $('input.slider').slider({
+        formatter: function(value) {
+          return hexValue(value);
+        }
+      })
+    </script>
+  </body>
+</html>

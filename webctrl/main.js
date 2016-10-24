@@ -1,6 +1,7 @@
 const express = require('express')
 const log = require('./logging')
 const fs = require('fs')
+const path = require('path')
 const execSync = require('child_process').execSync
 
 const DATAFILE = 'data.json'
@@ -51,6 +52,7 @@ function flashNextProgram () {
 flashNextProgram()
 
 const app = express()
+app.use(express.static(path.join(__dirname, 'static')))
 
 function getState (info) {
   return '[' + Math.floor(Math.random() * 1000) + '] ' + info + ' | '
@@ -60,6 +62,28 @@ app.get('/', (req, res) => {
   const state = getState(req.url)
   const result = {
     status: 'ok'
+  }
+  res.sendFile('index.html')
+  log.debug(state + 'response sent: ' + JSON.stringify(result))
+})
+
+app.get('/queue', (req, res) => {
+  const state = getState(req.url)
+  const result = {
+    status: 'ok',
+    data: [{
+      name: 'program_1',
+      commands: 322,
+      status: 0
+    }, {
+      name: 'program_2',
+      commands: 2,
+      status: 1
+    }, {
+      name: 'program_3',
+      commands: 20,
+      status: 2
+    }]
   }
   res.status(200).json(result)
   log.debug(state + 'response sent: ' + JSON.stringify(result))
