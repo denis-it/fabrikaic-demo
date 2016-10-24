@@ -32,13 +32,18 @@ function flashNextProgram () {
       g_queueCache = []
 
       log.debug('start processing program \'' + program.name + '\'')
-      fs.writeFileSync(COMMANDSFILE, Buffer.from(program.commands), 'utf8')
+
+      let commands = Array.apply(null, Array(128)).map(Number.prototype.valueOf, 255)
 
       program.commands.forEach((command, index) => {
+        commands[index] = command
+
         if (index !== 0 && (command & 32) === 0) {
           pause += COMMAND_PAUSE
         }
       })
+
+      fs.writeFileSync(COMMANDSFILE, Buffer.from(commands), 'utf8')
 
       try {
         const stdout = execSync('avrdude -C +avrdude.conf -p t2313 -U eeprom:w:' + COMMANDSFILE + ':r')
