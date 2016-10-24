@@ -41,7 +41,7 @@ function flashNextProgram () {
       })
 
       try {
-        const stdout = 'MOCKED'//execSync('avrdude -C +avrdude.conf -p t2313 -U eeprom:w:' + COMMANDSFILE + ':r')
+        const stdout = execSync('avrdude -C +avrdude.conf -p t2313 -U eeprom:w:' + COMMANDSFILE + ':r')
         log.debug('avrdude stdout: ' + stdout)
         log.debug('program flashed, next flash on ' + pause + 'ms')
         setTimeout(flashNextProgram, pause)
