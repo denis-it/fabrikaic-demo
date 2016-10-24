@@ -1,10 +1,15 @@
-var QueueController = function ($scope, QueueService) {
-  QueueService.query(function (data) {
-    $scope.queue = data
-  })
+var QueueController = function ($scope, $interval, QueueService) {
+  function updateQueue () {
+    QueueService.query(function (data) {
+      $scope.queue = data
+    })
+  }
+
+  updateQueue()
+  $interval(updateQueue, 10000)
 }
 
-QueueController.$inject = ['$scope', 'QueueService']
+QueueController.$inject = ['$scope', '$interval', 'QueueService']
 
 var ProgramController = function ($scope, $timeout, $window, QueueService) {
   $scope.program = {name: undefined, positions: []}

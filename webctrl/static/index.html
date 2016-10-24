@@ -45,18 +45,18 @@
                   <thead>
                     <tr>
                       <th>#</th>
-                      <th>Program</th>
+                      <th>Name</th>
                       <th>Commands</th>
                       <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr ng-repeat="program in queue" class="{{program.status == 0 ? 'success' : program.status == 1 ? 'warning' : ''}}">
+                    <tr ng-repeat="program in queue" class="{{program.status == 0 ? 'success' : 'warning'}}">
                       <td>{{$index + 1}}</td>
                       <td ng-show="{{program.name != undefined}}">{{program.name}}</td>
                       <td ng-show="{{program.name == undefined}}"><i>undefined</i></td>
                       <td>{{program.commands}}</td>
-                      <td>{{program.status == 0 ? 'Finished' : program.status == 1 ? 'In progress' : 'Pending'}}</td>
+                      <td>{{program.status == 0 ? 'Flashed' : 'Pending'}}</td>
                     </tr>
                   </tbody>
                 </table>
