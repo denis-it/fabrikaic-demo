@@ -52,6 +52,7 @@ dkms.conf
 
 # Vim files
 .*.swp
+.*.swo
 
 # Local files
 .local/
