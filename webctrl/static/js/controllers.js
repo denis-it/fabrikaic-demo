@@ -23,9 +23,18 @@ var ProgramController = function ($scope, $timeout, $window, QueueService) {
     $scope.program.positions.push(position)
   }
 
+  function invert (program, channel) {
+    program.positions.forEach(function (position) {
+      position[channel] = 31 - position[channel]
+    })
+    return program
+  }
+
   function compile (program) {
     const SERVO = [0, 64, 128]
     const SKIP_WAIT = 32
+
+    invert(program, 1)
 
     const result = {name: program.name || undefined, commands: []}
     let last = null
