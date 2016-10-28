@@ -21,7 +21,21 @@ let g_data = {
 
 let g_queueCache = []
 
+function cleanQueue () {
+  g_queueCache = []
+  g_data.programs.splice(0, g_data.pointer - 1)
+  g_data.pointer = 1
+}
+
 function flashNextProgram () {
+  try {
+    if (g_data.pointer > 10) {
+      cleanQueue()
+    }
+  } catch (e) {
+    log.error('an error occurred during queue cleaning: ' + JSON.stringify(e))
+  }
+
   try {
     let pause = DEFAULT_PAUSE
 
@@ -31,7 +45,7 @@ function flashNextProgram () {
       g_data.pointer += 1
       g_queueCache = []
 
-      log.debug('start processing program \'' + program.name + '\'')
+      log.info('start processing program \'' + program.name + '\'')
 
       let commands = Array.apply(null, Array(128)).map(Number.prototype.valueOf, 255)
 
@@ -47,14 +61,14 @@ function flashNextProgram () {
 
       try {
         const stdout = execSync('avrdude -C +avrdude.conf -p t2313 -U eeprom:w:' + COMMANDSFILE + ':r')
-        log.debug('avrdude stdout: ' + stdout)
-        log.debug('program flashed, next flash on ' + pause + 'ms')
+        log.verbose('avrdude stdout: ' + stdout)
+        log.info('program flashed, next flash on ' + pause + 'ms')
         setTimeout(flashNextProgram, pause)
       } catch (e) {
         log.error('error executing avrdude: ' + JSON.stringify(e))
       }
     } else {
-      log.debug('no new programs, retry on ' + pause + 'ms')
+      log.verbose('no new programs, retry on ' + pause + 'ms')
       setTimeout(flashNextProgram, pause)
     }
   } catch (e) {
@@ -100,5 +114,5 @@ app.post('/api/queue', (req, res) => {
 })
 
 app.listen(8080, () => {
-  log.debug('listening on *:8080')
+  log.info('listening on *:8080')
 })

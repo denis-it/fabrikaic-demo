@@ -3,12 +3,10 @@ fabrikaic-demo:
   command: node_modules/.bin/nodemon --config nodemon.json main.js
   environment:
     NODE_ENV: development
-    LOG_LEVEL: silly
+    LOG_LEVEL: verbose
     DEBUG: ''
   ports:
     - '8080:8080'
   volumes:
     - .:/home/fabrikaic-demo/data
     - /home/fabrikaic-demo/data/node_modules
-  devices:
-    - /dev/ttyACM0:/dev/ttyACM0
